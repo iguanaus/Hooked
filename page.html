@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Real time game</title>
+        <style type="text/css">
+           
+        </style>
+        <script src="http://code.jquery.com/jquery-latest.min.js"
+        type="text/javascript"></script>
+        <script src="https://code.highcharts.com/stock/highstock.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript">
+
+
+        window.onload = function() {
+            var socket = io.connect('http://localhost:3250');
+
+            Highcharts.setOptions({
+                global: {
+                    useUTC: false
+                }
+            });
+
+            // Create the chart
+            var priceChart = new Highcharts.stockChart('chart', {
+                chart: {
+                    events: {
+                        load: function () {
+                            var series = this.series[0];
+                            socket.on('price', function (data) {
+                                console.log(data);
+                                stockPrice.innerHTML = data.price;
+                                var x = (new Date()).getTime();
+                                var y = data.price;
+                                series.addPoint([x,y],true,true,false);
+                            });
+                            //chart.redraw();
+
+
+                            // set up the updating of the chart each second
+                            
+
+                            //setInterval(function () {
+                            //    var x = (new Date()).getTime(), // current time
+                            //        y = Math.round(Math.random() * 100);
+                            //    series.addPoint([x, y], true, true);
+                            //}, 1000);
+                        }
+                    }
+                },
+
+                rangeSelector: {
+                    buttons: [{
+                        count: 1,
+                        type: 'minute',
+                        text: '1M'
+                    }, {
+                        count: 5,
+                        type: 'minute',
+                        text: '5M'
+                    }, {
+                        type: 'all',
+                        text: 'All'
+                    }],
+                    inputEnabled: false,
+                    selected: 0
+                },
+
+                title: {
+                    text: 'Live random data'
+                },
+
+                exporting: {
+                    enabled: false
+                },
+
+                series: [{
+                    name: 'Random data',
+                    data: (function () {
+                        // generate an array of random data
+                        var data = [],
+                            time = (new Date()).getTime(),
+                            i;
+                        for (i = -100; i <= 0; i+= 1) {
+                            data.push([])
+                        }
+
+                        //for (i = -999; i <= 0; i += 1) {
+                        //    data.push([
+                        //        time + i * 1000,
+                        //        Math.round(Math.random() * 100)
+                        //    ]);
+                        //}
+                        return data;
+                    }())
+                }]
+            });
+
+
+            var welcome = document.getElementById("welcome");
+            var allUsers = document.getElementById("users");
+            var progress = document.getElementById("progress");
+            var buy = document.getElementById("buy");
+            var sell = document.getElementById("sell");
+            var money = document.getElementById("money");
+            var shares = document.getElementById("shares");
+            var results = document.getElementById("results");
+            var stockPrice = document.getElementById("stockprice");
+            var onBuy = true;
+
+            
+            socket.on('welcome', function (data) {
+                console.log(data);
+                welcome.innerHTML = "Welcome to the game <strong>" + data.name + "</strong>";
+            });
+            socket.on('users', function (data) {
+                allUsers.innerHTML = '<strong>Users:</strong>' + data.users;
+            });
+            socket.on('update', function (data) {
+                progress.innerHTML = data.currentWidth;
+                progress.style.width = parseInt(data.currentWidth) + "px";
+            });
+            
+
+            
+            buy.onclick = function() {
+                socket.emit("buy");
+                //alert("buy");
+            }
+            sell.onclick = function() {
+                socket.emit("sell");
+                //alert("sell");
+            }
+
+            $(document).keydown(function(e){
+                if (e.keyCode == 32) {
+                    //This will emit a buy or sell
+                    if (onBuy) {
+                        socket.emit("buy");
+                        onBuy = false;
+                    } else {
+                        socket.emit("sell");
+                        onBuy = true;
+                    }
+                }
+                //console.log(e.keyCode);
+
+            });
+
+
+        }
+
+
+	</script>
+    </head>
+    <body class="main">
+        <div id="welcome"></div>
+        <div id="progress"></div>
+        <hr />
+        <div id="stockprice">Price</div>
+        <div id="buy">Buy</div>
+        <div id="sell">Sell</div>
+        <div id="Money"></div>
+        <div id="Shares"></div>
+        
+        <hr />
+        <div id="users"></div>
+        <hr />
+        <div id="results"></div>
+
+        <div id="chart" style="height: 400px; min-width: 310px"></div>
+
+    </body>
+    <script>
+
+        //var y = new Date()).getTime();
+        //var x = 1;
+        //priceChart.series[0].addPoint([x,y],true,true);
+
+
+    </script>
+
+</html>
