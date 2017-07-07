@@ -14,9 +14,9 @@ var Moniker = require('moniker');
 var port = 3250;
 var myval = 0;
 var commis = 1.0;
-var spread = .01;
+var spread = 0.01;
 
-var inputFile='06_01.csv';
+var inputFile='data/06_01.csv';
 var myData = 0;
 
 console.log("Parsing...");
