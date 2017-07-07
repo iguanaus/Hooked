@@ -22,7 +22,7 @@ var myData = 0;
 console.log("Parsing...");
 var prices = [];
 var i = 0;
-var timeCount = random(0,10000);
+var timeCount = parseInt(random(0,10000));
 
 
 //var fruits = ["Banana", "Orange", "Apple", "Mango"];
