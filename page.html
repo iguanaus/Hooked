@@ -10,7 +10,10 @@
         <script src="https://code.highcharts.com/stock/highstock.js"></script>
         <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
         <script src="/socket.io/socket.io.js"></script>
+        <script src="theme.js"></script>
+        
         <script type="text/javascript">
+
 
 
         window.onload = function() {
@@ -30,7 +33,7 @@
                             var series = this.series[0];
                             socket.on('price', function (data) {
                                 console.log(data);
-                                stockPrice.innerHTML = data.price;
+                                //stockPrice.innerHTML = data.price;
                                 var x = (new Date()).getTime();
                                 var y = data.price;
                                 series.addPoint([x,y],true,true,false);
@@ -49,30 +52,64 @@
                         }
                     }
                 },
+                plotOptions: {
+                    area: {
+                        fillColor: {
+                            linearGradient: {
+                                x1: 0,
+                                y1: 0,
+                                x2: 0,
+                                y2: 1
+                            },
+                            stops: [
+                                [0, Highcharts.getOptions().colors[0]],
+                                [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                            ]
+                        },
+                        marker: {
+                            radius: 2
+                        },
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                lineWidth: 1
+                            }
+                        },
+                        threshold: null
+                    }
+                },
+
+
 
                 rangeSelector: {
-                    buttons: [{
-                        count: 1,
-                        type: 'minute',
-                        text: '1M'
-                    }, {
-                        count: 5,
-                        type: 'minute',
-                        text: '5M'
-                    }, {
-                        type: 'all',
-                        text: 'All'
-                    }],
-                    inputEnabled: false,
-                    selected: 0
+                    enabled: false
                 },
 
                 title: {
-                    text: 'Live random data'
+                   
+                },
+
+                navigator: {
+                    enabled: false
+                },
+                scrollbar: {
+                    enabled: false
                 },
 
                 exporting: {
                     enabled: false
+                },
+                tooltip: { enabled: false },
+
+                xAxis: {
+                   lineWidth: 0,
+                   minorGridLineWidth: 0,
+                   lineColor: 'transparent',
+                   labels: {
+                       enabled: false
+                   },
+                   minorTickLength: 0,
+                   tickLength: 0
                 },
 
                 series: [{
@@ -98,40 +135,23 @@
             });
 
 
-            var welcome = document.getElementById("welcome");
             var allUsers = document.getElementById("users");
-            var progress = document.getElementById("progress");
-            var buy = document.getElementById("buy");
-            var sell = document.getElementById("sell");
-            var money = document.getElementById("money");
-            var shares = document.getElementById("shares");
             var results = document.getElementById("results");
-            var stockPrice = document.getElementById("stockprice");
             var onBuy = true;
 
             
-            socket.on('welcome', function (data) {
-                console.log(data);
-                welcome.innerHTML = "Welcome to the game <strong>" + data.name + "</strong>";
-            });
+            
             socket.on('users', function (data) {
-                allUsers.innerHTML = '<strong>Users:</strong>' + data.users;
+                allUsers.innerHTML = data.users;
             });
-            socket.on('update', function (data) {
-                progress.innerHTML = data.currentWidth;
-                progress.style.width = parseInt(data.currentWidth) + "px";
-            });
+            // socket.on('update', function (data) {
+            //     progress.innerHTML = data.currentWidth;
+            //     progress.style.width = parseInt(data.currentWidth) + "px";
+            // });
             
 
             
-            buy.onclick = function() {
-                socket.emit("buy");
-                //alert("buy");
-            }
-            sell.onclick = function() {
-                socket.emit("sell");
-                //alert("sell");
-            }
+            
 
             $(document).keydown(function(e){
                 if (e.keyCode == 32) {
@@ -148,28 +168,237 @@
 
             });
 
+            $(document).mousedown(function(e){
+                console.log("Clicked");
+                
+                if (onBuy) {
+                    socket.emit("buy");
+                    onBuy = false;
+                } else {
+                    socket.emit("sell");
+                    onBuy = true;
+                }
+    
+
+            });
+
 
         }
+
+        Highcharts.theme = {
+           colors: ['#2b908f', '#90ee7e', '#f45b5b', '#7798BF', '#aaeeee', '#ff0066', '#eeaaee',
+              '#55BF3B', '#DF5353', '#7798BF', '#aaeeee'],
+           chart: {
+              backgroundColor: {
+                 linearGradient: { x1: 0, y1: 0, x2: 0, y2: 0 },
+                 stops: [
+                    [0, '#000000'],
+                    [1, '#000000']
+                 ]
+              },
+              style: {
+                 fontFamily: '\'Unica One\', sans-serif'
+              },
+              plotBorderColor: '#606063'
+           },
+           title: {
+              style: {
+                 color: '#E0E0E3',
+                 textTransform: 'uppercase',
+                 fontSize: '20px'
+              }
+           },
+           subtitle: {
+              style: {
+                 color: '#E0E0E3',
+                 textTransform: 'uppercase'
+              }
+           },
+           xAxis: {
+              gridLineColor: '#707073',
+              labels: {
+                 style: {
+                    color: '#E0E0E3'
+                 }
+              },
+              lineColor: '#707073',
+              minorGridLineColor: '#505053',
+              tickColor: '#707073',
+              title: {
+                 style: {
+                    color: '#A0A0A3'
+
+                 }
+              }
+           },
+           yAxis: {
+              gridLineColor: '#707073',
+              labels: {
+                 style: {
+                    color: '#E0E0E3'
+                 }
+              },
+              lineColor: '#707073',
+              minorGridLineColor: '#505053',
+              tickColor: '#707073',
+              tickWidth: 1,
+              title: {
+                 style: {
+                    color: '#A0A0A3'
+                 }
+              }
+           },
+           tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.85)',
+              style: {
+                 color: '#F0F0F0'
+              }
+           },
+           plotOptions: {
+              series: {
+                 dataLabels: {
+                    color: '#B0B0B3'
+                 },
+                 marker: {
+                    lineColor: '#333'
+                 }
+              },
+              boxplot: {
+                 fillColor: '#505053'
+              },
+              candlestick: {
+                 lineColor: 'white'
+              },
+              errorbar: {
+                 color: 'white'
+              }
+           },
+           legend: {
+              itemStyle: {
+                 color: '#E0E0E3'
+              },
+              itemHoverStyle: {
+                 color: '#FFF'
+              },
+              itemHiddenStyle: {
+                 color: '#606063'
+              }
+           },
+           credits: {
+              style: {
+                 color: '#666'
+              }
+           },
+           labels: {
+              style: {
+                 color: '#707073'
+              }
+           },
+
+           drilldown: {
+              activeAxisLabelStyle: {
+                 color: '#F0F0F3'
+              },
+              activeDataLabelStyle: {
+                 color: '#F0F0F3'
+              }
+           },
+
+           navigation: {
+              buttonOptions: {
+                 symbolStroke: '#DDDDDD',
+                 theme: {
+                    fill: '#505053'
+                 }
+              }
+           },
+
+           // scroll charts
+           rangeSelector: {
+              buttonTheme: {
+                 fill: '#505053',
+                 stroke: '#000000',
+                 style: {
+                    color: '#CCC'
+                 },
+                 states: {
+                    hover: {
+                       fill: '#707073',
+                       stroke: '#000000',
+                       style: {
+                          color: 'white'
+                       }
+                    },
+                    select: {
+                       fill: '#000003',
+                       stroke: '#000000',
+                       style: {
+                          color: 'white'
+                       }
+                    }
+                 }
+              },
+              inputBoxBorderColor: '#505053',
+              inputStyle: {
+                 backgroundColor: '#333',
+                 color: 'silver'
+              },
+              labelStyle: {
+                 color: 'silver'
+              }
+           },
+
+           navigator: {
+              handles: {
+                 backgroundColor: '#666',
+                 borderColor: '#AAA'
+              },
+              outlineColor: '#CCC',
+              maskFill: 'rgba(255,255,255,0.1)',
+              series: {
+                 color: '#7798BF',
+                 lineColor: '#A6C7ED'
+              },
+              xAxis: {
+                 gridLineColor: '#505053'
+              }
+           },
+
+           scrollbar: {
+              barBackgroundColor: '#808083',
+              barBorderColor: '#808083',
+              buttonArrowColor: '#CCC',
+              buttonBackgroundColor: '#606063',
+              buttonBorderColor: '#606063',
+              rifleColor: '#FFF',
+              trackBackgroundColor: '#404043',
+              trackBorderColor: '#404043'
+           },
+
+           // special colors for some of the
+           legendBackgroundColor: 'rgba(0, 0, 0, 0.5)',
+           background2: '#505053',
+           dataLabelsColor: '#B0B0B3',
+           textColor: '#C0C0C0',
+           contrastTextColor: '#F0F0F3',
+           maskColor: 'rgba(255,255,255,0.3)'
+        };
+
+        // Apply the theme
+        Highcharts.setOptions(Highcharts.theme);
+
 
 
 	</script>
     </head>
-    <body class="main">
-        <div id="welcome"></div>
+    <body class="main" style='background:black'>
         <div id="progress"></div>
-        <hr />
-        <div id="stockprice">Price</div>
-        <div id="buy">Buy</div>
-        <div id="sell">Sell</div>
-        <div id="Money"></div>
-        <div id="Shares"></div>
+        <div id="chart" style="height:50% width: 100%"></div>
         
         <hr />
-        <div id="users"></div>
+        <div id="users" style='color:rgb(102,249,102)'></div>
         <hr />
         <div id="results"></div>
-
-        <div id="chart" style="height: 400px; min-width: 310px"></div>
 
     </body>
     <script>

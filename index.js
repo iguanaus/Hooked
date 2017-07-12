@@ -57,7 +57,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on("sell", function() {
         if (user.shares > 0) {
-            user.money = user.shares * (currentPrice-spread) - commis;
+            user.money = user.shares/100.0 * (currentPrice-spread) - commis;
             user.shares = 0;
             updateUsers();
         }
@@ -65,7 +65,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on("buy", function() {
         if (user.money > 0) {
-            user.shares = (user.money-commis)/(currentPrice+spread);
+            user.shares = (user.money-commis)/(currentPrice+spread)*100.0;
             user.money = 0;
             updateUsers();
         }
@@ -103,7 +103,11 @@ var updateUsers = function() {
     var str = '';
     for(var i=0; i<users.length; i++) {
         var user = users[i];
-        str += user.name + ' </br><small>(' + user.money + ' dollars)</small></br> <small> '+ user.shares + ' shares</small>';
+        if (user.money > 0) {
+            str += user.name + '</br><small>$'+ parseInt(user.money) +'</small>'
+        } else if (user.shares > 0) {
+            str += user.name + '</br><small>'+ parseInt(user.shares) +'</small>'
+        }
     }
     io.sockets.emit("users", { users: str });
 };
